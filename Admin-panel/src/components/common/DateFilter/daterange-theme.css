@@ -1,0 +1,336 @@
+/* Override react-date-range to match project theme with dark mode support */
+
+.rdrCalendarWrapper {
+  font-family: "Cairo", sans-serif;
+  font-size: 13px;
+  background: #ffffff;
+}
+
+.rdrMonthAndYearPickers select,
+.rdrMonthAndYearPickers select:focus {
+  color: #374151;
+  font-family: "Cairo", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  background: transparent;
+}
+
+.rdrPprevButton,
+.rdrNextButton {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+.rdrPprevButton:hover,
+.rdrNextButton:hover {
+  background: #e5e7eb;
+}
+.rdrPprevButton i {
+  border-color: transparent var(--color-primary) transparent transparent;
+}
+.rdrNextButton i {
+  border-color: transparent transparent transparent var(--color-primary);
+}
+
+.rdrWeekDay {
+  color: #707070;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ── All range spans: absolute, reduced height ── */
+.rdrSelected,
+.rdrInRange,
+.rdrStartEdge,
+.rdrEndEdge {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  background: currentColor;
+  border-radius: 0;
+}
+
+/* ── In-range: light primary color background ── */
+.rdrInRange {
+  color: rgba(var(--color-primary-rgb, 115, 103, 240), 0.18) !important;
+}
+
+/* ── Start/End edge: hide the span, circle is drawn on rdrDayNumber ── */
+.rdrStartEdge,
+.rdrEndEdge {
+  display: none !important;
+}
+
+/* ── Round left end of bar at week/month start ── */
+.rdrDayStartOfWeek .rdrInRange,
+.rdrDayStartOfMonth .rdrInRange {
+  border-radius: 999px 0 0 999px;
+  left: 2px;
+}
+
+/* ── Round right end of bar at week/month end ── */
+.rdrDayEndOfWeek .rdrInRange,
+.rdrDayEndOfMonth .rdrInRange {
+  border-radius: 0 999px 999px 0;
+  right: 2px;
+}
+
+/* ── Full pill when single in-range cell fills whole week ── */
+.rdrDayStartOfWeek.rdrDayEndOfWeek .rdrInRange {
+  border-radius: 999px;
+  left: 2px;
+  right: 2px;
+}
+
+/* ── Day number: sits above the bar ── */
+.rdrDayNumber {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+/* ── Primary color circle on start/end days ── */
+.rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber,
+.rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber {
+  background: var(--color-primary) !important;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  right: auto;
+  bottom: auto;
+}
+
+/* ── Text colors ── */
+.rdrDay:not(.rdrDayPassive) .rdrDayNumber span {
+  color: #374151;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+.rdrDayPassive .rdrDayNumber span {
+  color: #b0b0b0;
+}
+
+.rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.rdrDay:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span {
+  color: var(--color-primary) !important;
+  font-weight: 700;
+}
+
+/* ── Selected single day ── */
+.rdrSelected {
+  color: var(--color-primary) !important;
+  border-radius: 999px;
+  left: 2px;
+  right: 2px;
+}
+.rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* ── Today ── */
+.rdrDayToday .rdrDayNumber span::after {
+  display: none;
+}
+
+.rdrDayToday:not(.rdrDayHasActiveSelection) .rdrDayNumber {
+  border: 1px solid var(--color-primary);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  right: auto;
+  bottom: auto;
+}
+
+/* ── Hide preview outlines ── */
+.rdrDayStartPreview,
+.rdrDayInPreview,
+.rdrDayEndPreview {
+  display: none !important;
+}
+
+/* ── Hover: outline circle ── */
+.rdrDay:not(.rdrDayPassive):not(.rdrDayDisabled):hover .rdrDayNumber span {
+  color: var(--color-primary);
+}
+
+.rdrDay:not(.rdrDayPassive):not(.rdrDayDisabled):hover .rdrDayNumber {
+  outline: 1px solid var(--color-primary);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  right: auto;
+  bottom: auto;
+}
+
+/* ── Input fields ── */
+.rdrDateDisplayWrapper {
+  background: #f9fafb;
+  border-radius: 12px 12px 0 0;
+  padding: 8px 12px;
+}
+.rdrDateDisplayItem {
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: none;
+}
+.rdrDateDisplayItem input {
+  font-family: "Cairo", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+.rdrDateDisplayItemActive {
+  border-color: var(--color-primary);
+}
+
+.rdrMonth {
+  padding: 0 8px 8px;
+  width: 22em;
+}
+
+.rdrMonthAndYearWrapper {
+  padding-top: 6px;
+  height: 48px;
+}
+
+.rdrWeekDays {
+  padding: 0;
+}
+
+.rdrMonthAndYearPickers select {
+  padding-right: 20px;
+}
+
+/* ── DARK MODE OVERRIDES FOR REACT-DATE-RANGE ── */
+html.dark .rdrCalendarWrapper {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .rdrMonthAndYearPickers select {
+  color: #f8fafc !important;
+  background: #1e293b !important;
+}
+
+html.dark .rdrMonthAndYearPickers select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .rdrPprevButton,
+html.dark .rdrNextButton {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .rdrPprevButton:hover,
+html.dark .rdrNextButton:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark .rdrPprevButton i {
+  border-color: transparent #f8fafc transparent transparent !important;
+}
+html.dark .rdrNextButton i {
+  border-color: transparent transparent transparent #f8fafc !important;
+}
+
+html.dark .rdrWeekDay {
+  color: #94a3b8 !important;
+}
+
+html.dark .rdrDay:not(.rdrDayPassive) .rdrDayNumber span {
+  color: #f8fafc !important;
+}
+
+html.dark .rdrDayPassive .rdrDayNumber span {
+  color: #475569 !important;
+}
+
+html.dark .rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span,
+html.dark .rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span,
+html.dark .rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  color: #ffffff !important;
+}
+
+html.dark .rdrDay:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span {
+  color: #c084fc !important;
+}
+
+html.dark .rdrInRange {
+  color: rgba(115, 103, 240, 0.25) !important;
+}
+
+html.dark .rdrDateDisplayWrapper {
+  background: #1e2235 !important;
+}
+
+html.dark .rdrDateDisplayItem {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .rdrDateDisplayItem input {
+  color: #f8fafc !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .rdrCalendarWrapper {
+    width: 100% !important;
+    font-size: 11px !important;
+  }
+
+  .rdrMonth {
+    width: 100% !important;
+    padding: 4px 4px 4px !important;
+    min-width: 280px;
+  }
+
+  .rdrDayNumber {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber,
+  .rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber,
+  .rdrDayToday:not(.rdrDayHasActiveSelection) .rdrDayNumber,
+  .rdrDay:not(.rdrDayPassive):not(.rdrDayDisabled):hover .rdrDayNumber {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .rdrDateDisplayWrapper {
+    padding: 4px 8px !important;
+  }
+
+  .rdrMonthAndYearPickers select {
+    font-size: 12px !important;
+  }
+}

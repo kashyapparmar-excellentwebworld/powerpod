@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/src/assets/fonts/Cairo-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/src/assets/fonts/Cairo-Medium.ttf") format("truetype");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/src/assets/fonts/Cairo-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/src/assets/fonts/Cairo-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+
+:root {
+  --color-surface: #f8f9fa;
+  --color-surface-light: #ffffff;
+  --color-surface-hover: #f1edfa;
+  --color-primary: #0ea5e9;
+  --color-secondary: #0284c7;
+  --color-tertiary: #0369a1;
+  --color-black: #101010;
+  --color-gray-6: #707070;
+}
+
+@theme {
+  --font-sans: "Cairo", sans-serif;
+
+  --color-surface: #f8f9fa;
+  --color-surface-light: #ffffff;
+  --color-surface-hover: #f1edfa;
+  --color-surface-error: #FFF1F1;
+  --color-primary: #0ea5e9;
+  --color-secondary: #0284c7;
+  --color-tertiary: #0369a1;
+  --color-gray-light: #EBEBEB;
+  --color-black: #101010;
+  --color-white: #ffffff;
+  --color-gray-6: #707070;
+  --color-active: #0ea5e9;
+  --color-error: #dc2626;
+}
+
+html {
+  zoom: 80%;
+  min-height: 125vh;
+  height: 125vh;
+  background-color: var(--color-surface, #f8f9fa);
+}
+
+.bg-surface {
+  background-color: var(--color-surface, #f8f9fa) !important;
+}
+
+.bg-surface-light {
+  background-color: var(--color-surface-light, #ffffff) !important;
+}
+
+#root {
+  min-height: 125vh;
+  height: 125vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface, #f8f9fa);
+  color: var(--color-black, #101010);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 125vh;
+  height: 125vh;
+}
+
+/* Global Dark Mode Overrides for Cards & Containers */
+html.dark body {
+  background-color: var(--color-surface, #0f172a);
+  color: #f8fafc;
+}
+
+html.dark .bg-white,
+html.dark .bg-surface-light {
+  background-color: var(--color-surface-light, #1e293b) !important;
+  color: #f8fafc;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .bg-gray-50 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .border-slate-50,
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-gray-50,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-light {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-black,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+/* Select option dropdown popup menu styling */
+select option {
+  background-color: #ffffff;
+  color: #101010;
+}
+
+html.dark select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Bordered skin utility mode */
+html.skin-bordered .bg-surface-light,
+html[data-skin="bordered"] .MuiPaper-root {
+  box-shadow: none !important;
+}
+
+/* Default skin utility mode - remove all structural borders */
+html:not(.skin-bordered) .bg-surface-light {
+  border-color: transparent !important;
+}
+
+/* Default skin utility mode - add default shadows to cards so they don't look flat */
+html:not(.skin-bordered) .bg-surface-light.rounded-lg,
+html:not(.skin-bordered) .bg-surface-light.rounded-xl,
+html:not(.skin-bordered) .bg-surface-light.rounded-2xl {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+html:not(.skin-bordered) .bg-surface-light.rounded-lg:hover,
+html:not(.skin-bordered) .bg-surface-light.rounded-xl:hover,
+html:not(.skin-bordered) .bg-surface-light.rounded-2xl:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Keyframes */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar::-webkit-scrollbar,
+.scrollbar::-webkit-scrollbar-track,
+.scrollbar::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+}
