@@ -1,0 +1,480 @@
+// =============================================================================
+// Part 1: Config
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// Part 2: Enums
+// =============================================================================
+
+// Which user table the session belongs to
+enum EntityType {
+  admin
+  supplier
+  buyer
+}
+
+// Which client application issued the session
+enum ClientType {
+  admin
+  supplier_web
+  supplier_app
+  buyer_web
+  buyer_app
+}
+
+// =============================================================================
+// Part 3: Models & RBAC Architecture
+// =============================================================================
+
+model Module {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  icon      String?  @db.VarChar(100)
+  route     String?  @db.VarChar(255)
+  parentId  String?  @map("parent_id") @db.Uuid
+  sortOrder Int      @default(0) @map("sort_order")
+  status    String   @default("ACTIVE") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  parent      Module?      @relation("ModuleParent", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Module[]     @relation("ModuleParent")
+  permissions Permission[]
+
+  @@map("modules")
+}
+
+model Permission {
+  id            String   @id @default(uuid()) @db.Uuid
+  moduleId      String   @map("module_id") @db.Uuid
+  name          String   @db.VarChar(100)
+  action        String   @db.VarChar(50)
+  permissionKey String   @unique @map("permission_key") @db.VarChar(100)
+  description   String?  @db.Text
+  status        String   @default("ACTIVE") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  module          Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model AdminRole {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique @db.VarChar(100)
+  label       String?   @db.VarChar(100)
+  description String?   @db.Text
+  isSystem    Boolean   @default(false) @map("is_system")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  admins          Admin[]
+  rolePermissions RolePermission[]
+
+  @@map("admin_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       AdminRole  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Admin {
+  id                  String    @id @default(uuid()) @db.Uuid
+  fullName            String    @map("full_name") @db.VarChar(200)
+  email               String    @unique @db.VarChar(255)
+  passwordHash        String    @map("password_hash")
+  roleId              String    @map("role_id") @db.Uuid
+  avatarUrl           String?   @map("avatar_url")
+  lastLoginAt         DateTime? @map("last_login_at") @db.Timestamptz(6)
+  isActive            Boolean   @default(true) @map("is_active")
+  passwordResetToken  String?   @map("password_reset_token")
+  passwordResetExpiry DateTime? @map("password_reset_expiry") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  role AdminRole @relation(fields: [roleId], references: [id])
+  skills StaffSkill[]
+  auditLogs AuditLog[]
+
+  @@map("admins")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  adminId     String?  @map("admin_id") @db.Uuid
+  adminEmail  String?  @map("admin_email") @db.VarChar(255)
+  adminName   String?  @map("admin_name") @db.VarChar(255)
+  action      String   @db.VarChar(100)
+  module      String   @db.VarChar(100)
+  description String   @db.Text
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  userAgent   String?  @map("user_agent") @db.Text
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  admin Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([module])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// No FK constraint by design — entity_id references admins, suppliers, or buyers
+// depending on entity_type. Cascade deletes must be handled at the application layer.
+model Session {
+  id         BigInt     @id @default(autoincrement())
+  entityType EntityType @map("entity_type")
+  entityId   String     @map("entity_id") @db.Uuid
+  clientType ClientType @map("client_type")
+  tokenHash  String     @unique @map("token_hash") @db.VarChar(255)
+  deviceInfo Json?      @map("device_info")
+  ipAddress  String?    @map("ip_address") @db.VarChar(45)
+  expiresAt  DateTime   @map("expires_at") @db.Timestamptz(6)
+  revokedAt  DateTime?  @map("revoked_at") @db.Timestamptz(6)
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([entityType, entityId])
+  @@index([clientType])
+  @@map("sessions")
+}
+
+enum CmsPageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model CmsPage {
+  id        String        @id @default(uuid()) @db.Uuid
+  slug      String        @unique @db.VarChar(150)
+  status    CmsPageStatus @default(DRAFT)
+  createdBy String?       @map("created_by") @db.Uuid
+  updatedBy String?       @map("updated_by") @db.Uuid
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz(6)
+
+  translations CmsPageTranslation[]
+  versions     CmsPageVersion[]
+
+  @@map("cms_pages")
+}
+
+model CmsPageTranslation {
+  id               String   @id @default(uuid()) @db.Uuid
+  pageId           String   @map("page_id") @db.Uuid
+  languageCode     String   @map("language_code") @db.VarChar(10)
+  title            String   @db.VarChar(255)
+  contentHtml      String   @map("content_html") @db.Text
+  metaTitle        String?  @map("meta_title") @db.VarChar(255)
+  metaDescription  String?  @map("meta_description") @db.Text
+  canonicalUrl     String?  @map("canonical_url")
+  robots           String?  @default("index, follow") @db.VarChar(100)
+  ogTitle          String?  @map("og_title") @db.VarChar(255)
+  ogDescription    String?  @map("og_description") @db.Text
+  ogImage          String?  @map("og_image")
+  twitterCard      String?  @default("summary_large_image") @map("twitter_card") @db.VarChar(100)
+  publishedVersion Int      @default(1) @map("published_version")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  page CmsPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, languageCode])
+  @@index([languageCode])
+  @@map("cms_page_translations")
+}
+
+model CmsPageVersion {
+  id              String   @id @default(uuid()) @db.Uuid
+  pageId          String   @map("page_id") @db.Uuid
+  languageCode    String   @map("language_code") @db.VarChar(10)
+  version         Int
+  title           String   @db.VarChar(255)
+  contentHtml     String   @map("content_html") @db.Text
+  metaTitle       String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String?  @map("meta_description") @db.Text
+  createdBy       String?  @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  page CmsPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, languageCode, version])
+  @@map("cms_page_versions")
+}
+
+// =============================================================================
+// Part 4: Force Update & App Version Management
+// =============================================================================
+
+enum AppPlatform {
+  ANDROID
+  IOS
+  WEB
+}
+
+enum AppVersionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model AppVersion {
+  id                 String           @id @default(uuid()) @db.Uuid
+  platform           AppPlatform
+  currentVersion     String           @map("current_version") @db.VarChar(50)
+  minimumSupported   String           @map("minimum_supported") @db.VarChar(50)
+  recommendedVersion String           @map("recommended_version") @db.VarChar(50)
+  forceUpdate        Boolean          @default(false) @map("force_update")
+  maintenanceMode    Boolean          @default(false) @map("maintenance_mode")
+  maintenanceMessage String?          @map("maintenance_message") @db.Text
+  rolloutPercentage  Int              @default(100) @map("rollout_percentage")
+  playStoreUrl       String?          @map("play_store_url")
+  appStoreUrl        String?          @map("app_store_url")
+  webUrl             String?          @map("web_url")
+  status             AppVersionStatus @default(DRAFT)
+  createdBy          String?          @map("created_by") @db.Uuid
+  updatedBy          String?          @map("updated_by") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  appTranslations AppVersionTranslation[]
+  history         AppVersionHistory[]
+
+  @@index([platform, status])
+  @@map("app_versions")
+}
+
+model AppVersionTranslation {
+  id                     String   @id @default(uuid()) @db.Uuid
+  appVersionId           String   @map("app_version_id") @db.Uuid
+  languageCode           String   @map("language_code") @db.VarChar(10)
+  title                  String   @db.VarChar(255)
+  description            String   @db.Text
+  updateButtonText       String   @default("Update Now") @map("update_button_text") @db.VarChar(100)
+  skipButtonText         String   @default("Later") @map("skip_button_text") @db.VarChar(100)
+  maintenanceTitle       String   @default("Application Under Maintenance") @map("maintenance_title") @db.VarChar(255)
+  maintenanceDescription String   @default("We are performing scheduled maintenance. Please try again later.") @map("maintenance_description") @db.Text
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  appVersion AppVersion @relation(fields: [appVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([appVersionId, languageCode])
+  @@index([languageCode])
+  @@map("app_version_translations")
+}
+
+model AppVersionHistory {
+  id           String      @id @default(uuid()) @db.Uuid
+  appVersionId String?     @map("app_version_id") @db.Uuid
+  platform     AppPlatform
+  version      String      @db.VarChar(50)
+  releaseNotes String?     @map("release_notes") @db.Text
+  releasedAt   DateTime    @default(now()) @map("released_at") @db.Timestamptz(6)
+  createdBy    String?     @map("created_by") @db.Uuid
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  appVersion AppVersion? @relation(fields: [appVersionId], references: [id], onDelete: SetNull)
+
+  @@index([platform, version])
+  @@map("app_version_history")
+}
+
+model AppVersionCheckLog {
+  id        BigInt      @id @default(autoincrement())
+  platform  AppPlatform
+  version   String      @db.VarChar(50)
+  deviceId  String?     @map("device_id") @db.VarChar(150)
+  userId    String?     @map("user_id") @db.VarChar(150)
+  ip        String?     @db.VarChar(45)
+  result    String      @db.VarChar(50)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([platform, createdAt])
+  @@index([result])
+  @@map("app_version_check_logs")
+}
+
+model AppVersionAuditLog {
+  id           String      @id @default(uuid()) @db.Uuid
+  appVersionId String?     @map("app_version_id") @db.Uuid
+  platform     AppPlatform
+  action       String      @db.VarChar(100)
+  changes      Json?
+  performedBy  String?     @map("performed_by") @db.Uuid
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([appVersionId])
+  @@index([createdAt])
+  @@map("app_version_audit_logs")
+}
+
+// =============================================================================
+// Part 5: AI Guidance RAG System & Smart Auto-Ticket Assignment Engine
+// =============================================================================
+
+model AiConfig {
+  id                   String   @id @default(uuid()) @db.Uuid
+  aiEnabled            Boolean  @default(false) @map("ai_enabled")
+  geminiApiKey         String?  @map("gemini_api_key") @db.Text
+  hfToken              String?  @map("hf_token") @db.Text
+  hfModel              String?  @default("BAAI/bge-base-en-v1.5") @map("hf_model") @db.VarChar(255)
+  langsmithEnabled     Boolean? @default(false) @map("langsmith_enabled")
+  langsmithApiKey      String?  @map("langsmith_api_key") @db.Text
+  langsmithProject     String?  @default("wasla-ai-support") @map("langsmith_project") @db.VarChar(255)
+  confidenceThreshold  Float    @default(0.75) @map("confidence_threshold")
+  updatedBy            String?  @map("updated_by") @db.Uuid
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("ai_config")
+}
+
+model GuidanceDocument {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  fileName    String   @map("file_name") @db.VarChar(255)
+  fileType    String   @map("file_type") @db.VarChar(50)
+  fileSize    Int      @default(0) @map("file_size")
+  status      String   @default("PUBLISHED") @db.VarChar(50)
+  uploadedBy  String?  @map("uploaded_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  chunks GuidanceChunk[]
+
+  @@map("guidance_documents")
+}
+
+model GuidanceChunk {
+  id              String   @id @default(uuid()) @db.Uuid
+  documentId      String   @map("document_id") @db.Uuid
+  chunkIndex      Int      @map("chunk_index")
+  content         String   @db.Text
+  vectorEmbedding Json?    @map("vector_embedding")
+  tokenCount      Int      @default(0) @map("token_count")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  document GuidanceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("guidance_chunks")
+}
+
+model SupportDepartment {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  code        String   @unique @db.VarChar(50)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  skills  StaffSkill[]
+  tickets SupportTicket[]
+
+  @@map("support_departments")
+}
+
+model StaffSkill {
+  id              String   @id @default(uuid()) @db.Uuid
+  adminId         String   @map("admin_id") @db.Uuid
+  departmentId    String   @map("department_id") @db.Uuid
+  specialty       String   @db.VarChar(100)
+  experienceLevel Int      @default(3) @map("experience_level")
+  isAvailable     Boolean  @default(true) @map("is_available")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  department SupportDepartment @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([departmentId])
+  @@map("staff_skills")
+}
+
+model SupportTicket {
+  id              String    @id @default(uuid()) @db.Uuid
+  ticketNumber    String    @unique @map("ticket_number") @db.VarChar(50)
+  requesterId     String?   @map("requester_id") @db.VarChar(150)
+  requesterType   String    @default("passenger") @map("requester_type") @db.VarChar(50)
+  subject         String    @db.VarChar(255)
+  description     String    @db.Text
+  departmentId    String?   @map("department_id") @db.Uuid
+  category        String    @default("general") @db.VarChar(100)
+  priority        String    @default("MEDIUM") @db.VarChar(50)
+  status          String    @default("OPEN") @db.VarChar(50)
+  assignedAdminId String?   @map("assigned_admin_id") @db.Uuid
+  confidenceScore Float?    @map("confidence_score")
+  aiSummary       String?   @map("ai_summary") @db.Text
+  slaDueDate      DateTime? @map("sla_due_date") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  department SupportDepartment? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  assignments TicketAssignmentHistory[]
+
+  @@index([departmentId])
+  @@index([assignedAdminId])
+  @@index([status])
+  @@index([priority])
+  @@map("support_tickets")
+}
+
+model TicketAssignmentHistory {
+  id                String   @id @default(uuid()) @db.Uuid
+  ticketId          String   @map("ticket_id") @db.Uuid
+  assignedAdminId   String   @map("assigned_admin_id") @db.Uuid
+  candidateScore    Float    @map("candidate_score")
+  workloadScore     Float    @map("workload_score")
+  skillScore        Float    @map("skill_score")
+  availabilityScore Float    @map("availability_score")
+  assignedReason    String?  @map("assigned_reason") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([assignedAdminId])
+  @@map("ticket_assignment_history")
+}
+
+model AiFeedback {
+  id         String   @id @default(uuid()) @db.Uuid
+  query      String   @db.Text
+  aiAnswer   String   @map("ai_answer") @db.Text
+  rating     Int      @map("rating") // +1 for positive, -1 for negative
+  comment    String?  @db.Text
+  isVerified Boolean  @default(false) @map("is_verified")
+  adminId    String?  @map("admin_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([rating])
+  @@index([isVerified])
+  @@map("ai_feedback")
+}

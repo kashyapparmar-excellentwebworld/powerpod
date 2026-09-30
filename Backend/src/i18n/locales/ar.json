@@ -1,0 +1,67 @@
+{
+  "admin": {
+    "roles": {
+      "list_success": "تم جلب الأدوار بنجاح"
+    },
+    "admins": {
+      "list_success": "تم جلب المشرفين بنجاح",
+      "get_success": "تم جلب المشرف بنجاح",
+      "create_success": "تم إنشاء المشرف بنجاح",
+      "update_success": "تم تحديث المشرف بنجاح",
+      "delete_success": "تم حذف المشرف بنجاح",
+      "not_found": "المشرف غير موجود",
+      "email_taken": "يوجد حساب بهذا البريد الإلكتروني مسبقاً",
+      "role_not_found": "الدور غير موجود أو غير نشط",
+      "cannot_delete_self": "لا يمكنك حذف حسابك الخاص",
+      "cannot_deactivate_self": "لا يمكنك تعطيل حسابك الخاص",
+      "toggle_status_success": "تم تحديث حالة المشرف بنجاح"
+    },
+    "auth": {
+      "login_success": "تم تسجيل الدخول بنجاح",
+      "logout_success": "تم تسجيل الخروج بنجاح",
+      "refresh_success": "تم تحديث الرمز المميز بنجاح",
+      "refresh_invalid": "رمز التحديث غير صالح أو منتهي الصلاحية",
+      "refresh_session_expired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.",
+      "invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+      "account_inactive": "تم تعطيل حسابك",
+      "role_inactive": "تم تعطيل دورك",
+      "no_token": "لم يتم تقديم رمز مميز",
+      "token_invalid": "الرمز المميز غير صالح أو منتهي الصلاحية",
+      "forgot_password_success": "إذا كان هذا البريد الإلكتروني موجوداً ستتلقى رابط إعادة التعيين",
+      "forgot_password_email_subject": "إعادة تعيين كلمة المرور",
+      "reset_password_email_subject": "تم إعادة تعيين كلمة المرور بنجاح",
+      "reset_password_success": "تمت إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة.",
+      "reset_token_valid": "رمز إعادة التعيين صالح",
+      "reset_token_invalid": "رمز إعادة التعيين غير صالح أو منتهي الصلاحية",
+      "change_password_success": "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.",
+      "change_password_wrong_current": "كلمة المرور الحالية غير صحيحة",
+      "change_password_mismatch": "كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقتين",
+      "profile_fetched": "تم جلب الملف الشخصي بنجاح",
+      "profile_updated": "تم تحديث الملف الشخصي بنجاح",
+      "profile_not_found": "المشرف غير موجود"
+    }
+  },
+
+  "validation": {
+    "email_required": "البريد الإلكتروني مطلوب",
+    "email_invalid": "تنسيق البريد الإلكتروني غير صالح",
+    "password_required": "كلمة المرور مطلوبة",
+    "password_min": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "password_weak": "يجب أن تحتوي كلمة المرور على أحرف كبيرة وصغيرة وأرقام وأحرف خاصة",
+    "full_name_required": "الاسم الكامل مطلوب",
+    "token_required": "الرمز المميز مطلوب",
+    "current_password_required": "كلمة المرور الحالية مطلوبة",
+    "new_password_required": "كلمة المرور الجديدة مطلوبة",
+    "confirm_password_required": "تأكيد كلمة المرور مطلوب",
+    "avatar_url_invalid": "يجب أن يكون رابط الصورة الرمزية عنوان URL صالحاً",
+    "validation_failed": "فشل التحقق من الصحة",
+    "role_id_required": "معرف دور صالح مطلوب"
+  },
+
+  "common": {
+    "not_found": "السجل غير موجود",
+    "forbidden": "محظور — صلاحيات غير كافية",
+    "unauthorized": "غير مصادق عليه",
+    "internal_error": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  }
+}

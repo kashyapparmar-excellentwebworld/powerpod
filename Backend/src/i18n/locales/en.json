@@ -1,0 +1,67 @@
+{
+  "admin": {
+    "roles": {
+      "list_success": "Roles fetched successfully"
+    },
+    "admins": {
+      "list_success": "Admins fetched successfully",
+      "get_success": "Admin fetched successfully",
+      "create_success": "Admin created successfully",
+      "update_success": "Admin updated successfully",
+      "delete_success": "Admin deleted successfully",
+      "not_found": "Admin not found",
+      "email_taken": "An account with this email already exists",
+      "role_not_found": "Role not found or inactive",
+      "cannot_delete_self": "You cannot delete your own account",
+      "cannot_deactivate_self": "You cannot deactivate your own account",
+      "toggle_status_success": "Admin status updated successfully"
+    },
+    "auth": {
+      "login_success": "Login successful",
+      "logout_success": "Logged out successfully",
+      "refresh_success": "Token refreshed successfully",
+      "refresh_invalid": "Invalid or expired refresh token",
+      "refresh_session_expired": "Session expired. Please login again.",
+      "invalid_credentials": "Invalid email or password",
+      "account_inactive": "Your account has been deactivated",
+      "role_inactive": "Your role has been deactivated",
+      "no_token": "No token provided",
+      "token_invalid": "Invalid or expired token",
+      "forgot_password_success": "If this email exists you will receive a reset link",
+      "forgot_password_email_subject": "Reset Your Password",
+      "reset_password_email_subject": "Your Password Has Been Reset",
+      "reset_password_success": "Password reset successful. Please login with your new password.",
+      "reset_token_valid": "Reset token is valid",
+      "reset_token_invalid": "Invalid or expired reset token",
+      "change_password_success": "Password changed successfully. Please login again.",
+      "change_password_wrong_current": "Current password is incorrect",
+      "change_password_mismatch": "New password and confirm password do not match",
+      "profile_fetched": "Profile fetched successfully",
+      "profile_updated": "Profile updated successfully",
+      "profile_not_found": "Admin not found"
+    }
+  },
+
+  "validation": {
+    "email_required": "Email is required",
+    "email_invalid": "Invalid email format",
+    "password_required": "Password is required",
+    "password_min": "Password must be at least 8 characters",
+    "password_weak": "Password must contain uppercase, lowercase, number and special character",
+    "full_name_required": "Full name is required",
+    "token_required": "Token is required",
+    "current_password_required": "Current password is required",
+    "new_password_required": "New password is required",
+    "confirm_password_required": "Confirm password is required",
+    "avatar_url_invalid": "Avatar URL must be a valid URL",
+    "validation_failed": "Validation failed",
+    "role_id_required": "A valid role ID is required"
+  },
+
+  "common": {
+    "not_found": "Record not found",
+    "forbidden": "Forbidden — insufficient permissions",
+    "unauthorized": "Unauthenticated",
+    "internal_error": "Something went wrong. Please try again."
+  }
+}
